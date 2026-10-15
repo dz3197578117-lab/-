@@ -1,0 +1,92 @@
+package top.wkbin.zaomeng.platform
+
+import io.ktor.client.engine.HttpClientEngine
+import androidx.room3.RoomDatabase
+import kotlinx.coroutines.CoroutineDispatcher
+import okio.ByteString.Companion.decodeBase64
+import okio.ByteString.Companion.toByteString
+import okio.Path
+import top.wkbin.zaomeng.db.ZaomengDatabase
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource
+
+/**
+ * 平台差异抽象（expect/actual）。
+ *
+ * server 业务逻辑全部在 commonMain，仅有 JVM 系实现差异的 API 收拢到这里：
+ * Android 用 Logcat / Keystore / assets，JVM 用 stdout / 本地存储 / 文件系统。
+ */
+
+/** 平台日志：Android 走 Logcat，JVM 走 stdout/stderr。 */
+
+/** YAML 解析（snakeyaml 仅 JVM 系平台可用，隔离到 expect/actual；非 map 文档/解析失败返回 null）。 */
+
+/** YAML 序列化（block 风格，等价 snakeyaml DumperOptions.FlowStyle.BLOCK）。 */
+/** 随机 UUID（标准小写格式，等价 java.util.UUID.randomUUID().toString()）。 */
+/** Base64 编码（标准 RFC 4648，带 padding，无换行；okio 全平台实现）。 */
+fun base64Encode(bytes: ByteArray): String = bytes.toByteString().base64()
+
+/** Base64 解码（标准 RFC 4648）。 */
+fun base64Decode(text: String): ByteArray =
+    text.decodeBase64()?.toByteArray()
+        ?: throw IllegalArgumentException("Invalid base64 input")
+
+/** Zip 归档条目（目录条目 name 以 / 结尾）。 */
+data class ZipEntryData(val name: String, val content: ByteArray)
+
+/** 读取 zip 归档全部文件条目（跳过目录条目）。 */
+/** 写入 zip 归档。 */
+/** 磁盘空间信息（诊断用）。 */
+data class DiskSpaceInfo(val freeBytes: Long, val totalBytes: Long)
+
+/** 查询路径所在文件系统的剩余/总空间；失败返回 null。 */
+/** JVM 系统属性（Android 返回近似值，用于诊断报告）。 */
+/** 平台 IO 调度器（Android/JVM 均为 Dispatchers.IO，保留下发语义）。 */
+
+/** 平台 HTTP 客户端引擎（Android/JVM 均用 OkHttp）。 */
+/** 平台阻塞桥接（JVM/Android 用 runBlocking；Room DAO 为 suspend，服务层保持同步语义）。 */
+
+/** 服务器运行平台：数据根目录、提示词资源、安全密钥存储。 */
+interface ServerPlatform {
+    val dataRoot: Path
+    val promptSource: PromptSource
+    fun secureStore(): SecureKeyValueStore
+
+    /** Room 数据库构建器（平台只提供路径/Context，驱动与协程上下文在公共代码统一配置）。 */
+    fun databaseBuilder(): RoomDatabase.Builder<ZaomengDatabase>
+
+    /**
+     * 端侧推理运行时；平台不具备该能力时返回 null。
+     *
+     * 默认返回 null：没有打包 aarch64 原生产物、或系统未安装 llama-server 的安装包都走这条分支，
+     * 上层表现为「当前环境不支持端侧推理」，其余功能不受影响。
+     */
+    fun onDeviceRuntime(): OnDeviceRuntime? = null
+
+    /**
+     * 运行期日志来源；平台没有采集能力时返回 null。
+     *
+     * Android 返回 [AndroidRuntimeLog]（持续采集本进程 logcat），JVM 返回进程内缓冲实现。
+     * 返回 null 时诊断报告与「运行日志」页退化为「不可用」，不影响其余诊断字段。
+     */
+    fun runtimeLogSource(): RuntimeLogSource? = null
+
+    /**
+     * 进程已运行时长（毫秒）；无法获取时返回 -1。
+     *
+     * 用于诊断自检：崩溃与 OOM 现场里「进程活了多久」是判断「启动期就崩」还是
+     * 「跑久了才崩」的关键信息。
+     */
+    fun processUptimeMillis(): Long = -1L
+}
+
+/** 当前 UTC 时间的 ISO-8601 字符串（等价 Instant.now().toString()）。 */
+@OptIn(ExperimentalTime::class)
+fun nowIsoString(): String = Clock.System.now().toString()
+
+/** 当前 epoch 毫秒（等价 System.currentTimeMillis()）。 */
+
+/** 单调时钟纳秒（等价 System.nanoTime()）。 */
+
+/** 字节数组小写十六进制（等价 "%02x".format(byte) 拼接）。 */

@@ -1,0 +1,5 @@
+package top.wkbin.zaomeng.ui.graphics
+
+import androidx.compose.ui.graphics.ImageBitmap
+
+/** 解码头像等图片字节为 Compose ImageBitmap（Android 走 BitmapFactory，JVM 走 Skia）。 */

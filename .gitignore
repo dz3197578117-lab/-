@@ -1,0 +1,87 @@
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Python packaging and test artifacts
+build/
+dist/
+*.egg-info/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.hypothesis/
+.nox/
+.tox/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Tooling/cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.zaomeng-web/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+*~
+
+# Local runtime/config artifacts
+config.yaml
+.env
+.env.*
+!.env.example
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.pid
+data/*
+!data/characters/
+!data/relations/
+!data/sessions/
+!data/corrections/
+data/characters/*
+data/relations/*
+data/sessions/*
+data/corrections/*
+!data/characters/.gitkeep
+!data/relations/.gitkeep
+!data/sessions/.gitkeep
+!data/corrections/.gitkeep
+zaomeng-data/
+logs/
+outputs/
+clawhub-zaomeng-skill/runtime/data/
+
+# Local/generated Android Studio project mirror (contains signing credentials)
+/android/
+
+# IDE/TOOLS
+.trae/
+.reasonix/
+
+# ---------------------------------------------------------------------------
+# 以下为「反向排除」：上面的通用规则会误伤这几个必须随仓库分发的文件
+# ---------------------------------------------------------------------------
+
+# 端侧推理靠执行 jniLibs/arm64-v8a/libllama-server.so 启动 llama-server 子进程，
+# 它不是编译期产物而是预编译好、必须随 APK 一起装的运行时资产；
+# 上面的 `*.so`（本意是挡 Python 扩展）会把它一起挡掉，导致别人 clone 后
+# 端侧功能永久不可用（要自己重跑 scripts/build-llama-server-android.sh）。
+!kmp/app/androidApp/src/main/jniLibs/**/*.so
+
+# 发布产物：Android APK 改由 GitHub Actions 在推送 v* tag 时构建并上传到 Release，
+# 不再进入版本控制（此前每发一版仓库体积 +39 MB，且依赖手工提交二进制）。
+# 上面的 `dist/` 规则继续挡住 skill 包等本地产物。流程见 docs/release-android.md。
