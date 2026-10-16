@@ -6,6 +6,26 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 每个 tag 对应的 GitHub Release 正文取自 [`.github/release-notes/`](.github/release-notes/)。
 
+## [2.2.0] - 2026-10-16
+
+### 重构：单模块 Android 工程，去掉内嵌 HTTP 层
+
+本版是**架构重构**，不是功能版本。对使用者的唯一可见变化：**桌面端不再提供**（Android 功能不变）。
+
+| 项 | 说明 |
+| --- | --- |
+| 工程结构 | 33 个 KMP 模块 → **1 个 Android 模块**（`kmp/app/androidApp`）。Compose Multiplatform → Jetpack Compose；`expect/actual` 全部消除；`app/shared`、`app/desktopApp` 与各 `feature/*`、`core/*`、`data/*`、`server/*` 模块合并进单模块 |
+| 内嵌 HTTP 层 | 以前客户端在进程内起一个 Ktor CIO 服务端（监听 `127.0.0.1` 随机端口），再经 localhost HTTP/SSE 调回自己。现在改为**进程内直接调用**：路由、鉴权、SSE 编解码、本地 HTTP 客户端与端口监听整体删除，`LocalBackendController` → `InProcessBackendController` |
+| 对话流式 | SSE 文本层消失，直接消费服务内部的 `Flow`；事件序列（status / delta / reset / complete / failure）与原先逐项一致 |
+| 依赖 | 移除 Ktor **服务端**依赖（6 项 build + 7 条版本目录条目）。保留 Ktor **客户端**：模型 API、在线书库、更新检查、端侧 llama-server 仍需对外网络。APK 40.2 MB → 37.7 MB |
+| 桌面端 | **不再构建**（此前只支持 macOS / Linux；Windows 支持已于 2.1.14 移除） |
+| 数据兼容 | Room schema 与 2.1.21 **逐字节一致**（version 2，identityHash `305fe8fbcc5f78d3`）→ **可直接覆盖安装，不会丢数据** |
+
+顺带修正：删路由后暴露出两个**从未被客户端调用**的死端点（非流式 `/reply`、`/suggestions` 与 `/associations`）；
+构建期生成物 `GeneratedAppVersion` 与 `AppMetadata` 内容重复，已合并为后者。
+
+验证：干净构建 + **467/467** 单元测试通过；从远程全新克隆后构建产物字节数与本地完全一致。
+
 ## [2.1.21] - 2026-10-14
 
 ### 回退：语音朗读特性（撤回 2.1.19 / 2.1.20 的内容）

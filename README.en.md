@@ -22,6 +22,7 @@ Three things this fork keeps improving on top of upstream 2.0: **it runs offline
 
 | Change | Notes | Since |
 | --- | --- | --- |
+| Single-module build, embedded HTTP layer removed | The project went from 33 KMP modules to a **single-module Android app**, and the old "start a Ktor server in-process, then call back over localhost HTTP/SSE" round trip became a **direct in-process call**. Android features are unchanged; the APK shrank from 40.2 MB to 37.7 MB | 2.2.0 |
 | On-device inference | llama.cpp runtime bundled in the APK; import a GGUF and run without an API key | 2.1.2 |
 | Five more provider presets | SenseNova, SiliconFlow, Kimi, GLM, MiniMax | 2.1.2 |
 | Fetch model list from the endpoint | Falls back to built-in presets on failure | 2.1.2 |

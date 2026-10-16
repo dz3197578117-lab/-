@@ -105,8 +105,8 @@
 | 自动构建 | 推送 `v*` tag 时由 GitHub Actions 自动构建、校验签名与版本并发布 | 2.1.4 |
 | 版本号单一来源 | `kmp/gradle.properties`；应用内显示与实际 APK 不再不一致 | 2.1.5 |
 | 仓库守卫 | 源码守卫（成员扩展自递归）、提示词副本同步、发布元数据一致性 | 2.1.6 / 2.1.7 / 2.1.11 |
-| **纯 Android 单模块工程** | 工程从「KMP 多模块 + Compose Multiplatform（Android/桌面/Windows）」收敛为**单模块 Android 应用**：桌面端与 Windows 支持随之移除，`expect/actual` 与 Compose Resources 一并去掉。Android 功能不受影响 | 未发布 |
-| **去掉内嵌 HTTP 层** | 以前客户端在进程内起一个 Ktor CIO 服务端，再经 `localhost` HTTP/SSE 调回自己。现在改为**进程内直接调用**：去掉监听端口、鉴权、路由、SSE 编解码与本地 HTTP 客户端，对话流式改为直接消费 `Flow`。对外网络（模型 API、在线书库、更新检查、端侧 llama-server）仍用 Ktor 客户端 | 未发布 |
+| **纯 Android 单模块工程** | 工程从「KMP 多模块 + Compose Multiplatform（Android/桌面/Windows）」收敛为**单模块 Android 应用**：桌面端与 Windows 支持随之移除，`expect/actual` 与 Compose Resources 一并去掉。Android 功能不受影响 | 2.2.0 |
+| **去掉内嵌 HTTP 层** | 以前客户端在进程内起一个 Ktor CIO 服务端，再经 `localhost` HTTP/SSE 调回自己。现在改为**进程内直接调用**：去掉监听端口、鉴权、路由、SSE 编解码与本地 HTTP 客户端，对话流式改为直接消费 `Flow`。对外网络（模型 API、在线书库、更新检查、端侧 llama-server）仍用 Ktor 客户端 | 2.2.0 |
 | 提示词守卫接入开发自检 | `check-prompt-sync.sh` 以前只写在文档里靠人记得跑；现在由 `dev_checks.py` 调用（没有 bash 时明确跳过） | 2.1.14 |
 
 ---
